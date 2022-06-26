@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from posts.models import Group, Post, User
+from posts.models import Group, Post
 from rest_framework import filters, viewsets
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -40,15 +40,12 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class FollowViewSet(viewsets.ModelViewSet):
     serializer_class = FollowSerializer
-    permission_classes = (IsAuthenticated, )
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('user__username', 'following__username')
-
-    def get_user(self):
-        return get_object_or_404(User, id=self.request.user.pk)
+    permission_classes = [IsAuthenticated, ]
+    filter_backends = [filters.SearchFilter, ]
+    search_fields = ['user__username', 'following__username']
 
     def get_queryset(self):
-        return self.get_user().follower
+        return self.request.user.follower
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
